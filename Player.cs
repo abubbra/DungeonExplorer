@@ -1,69 +1,83 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
+using System.Linq;
 using System.Net.Http.Headers;
 using System.Xml.Schema;
 
 namespace DungeonExplorer
 {
-    public class Player
+    public class Player : Creature
     {
-        public string Name { get; set; }
-        public Player (string name)
+        public override int Attack()
         {
-            Name = name;
+            throw new NotImplementedException();
         }
-        public int Health { get; set; }
-        public const int maxhealth = 100; //sets max player health to be 100
-       
-        private List<string> inventory = new List<string>();
-
-        public void displayhealth ()
+        public override void onDeath()
         {
-            Console.WriteLine ("current health is" +Health); //shows the players current health when they want to ask for it
+            throw new NotImplementedException();
         }
 
-        public void takeDamage(int dmg)
-        {
-            Health = Health - dmg;                  // calculates damage and the health remaining after damage has been taken
-         
+        public Player(string name, int health) : base(name, health) {
+            Inventory = new List<Item>();
         }
-        public Player(string name, int health) 
-        {
-            Name = name;
-            Health = health;
-            
-             
-            
-        }
-        
-        public void PickUpItem(string item)
-        {
-           inventory.Add(item);
 
-            Console.WriteLine($"{Name} picked up {item}");
-        }
-        public void showinventory()
+        public List<Item> Inventory { get; private set; }
+
+
+        public void PickUpItem(Item item)
         {
-            if (inventory.Count == 0)
+            Inventory.Add(item);
+            Console.WriteLine($"{name} picked up {item.Name}");
+        }
+
+        public void Useitem(Item item)
+        {
+            Item founditem = Inventory.Find(i => i.Name == item.Name.ToLower()); //finds the item in the players inventory
+            if (item != null) //if the item is in the players inventory
             {
-                Console.WriteLine("your inventory is empty");  //shows that the players inventory is empty 
+                item.Use(this); //uses the item
+                Inventory.Remove(item); //removes the item from the players inventory
+            }
+            else
+            {
+                Console.WriteLine("you do not have this item in your inventory"); //if the item is not in the players inventory
+            }
+        }
+
+        public void showinventory(string query)
+        {
+            List<Item> showItems = new List<Item>();
+            if (query == "default")
+                showItems = Inventory; //if the query is default, show all items in the inventory
+            else
+                showItems = Inventory.Where(i=> i.type == query).ToList(); //filters the players inventory by the query
+
+            if (showItems.Count == 0)
+            {
+                Console.WriteLine("empty");  //shows that the players inventory is empty 
             }
             else
             {
                 Console.WriteLine("currently in your inventory is:");   // shows the players current inventory 
-                foreach (string item in inventory)
+                foreach (var item in showItems)
                 {
-                    Console.WriteLine($"-{item}");     //displays the current item in the players inventory
+                    Console.WriteLine($"-{item.Name}  => {item.type}");     //displays the current item in the players inventory
                 }
             }
+            Console.WriteLine("sort by weapon, or potion, or enter return to return.");
+            switch(InputVerify.GetInput(new List<string> {"weapon", "potion", "return" }))
+            {
+                case "weapon":
+                    showinventory("weapon");
+                    break;
+                case "potion":
+                    showinventory("potion");
+                    break;
+                case "return":
+                    break;
+            }
         }
-
-        
-        public string InventoryContents()
-        {
-            return null;
-        }
-        
+        public void showinventory() => showinventory("default"); //overload for the showinventory method, this is used to show the inventory without a query
     }
 }
-
