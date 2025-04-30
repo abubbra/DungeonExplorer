@@ -6,45 +6,49 @@ using System.Threading.Tasks;
 
 namespace DungeonExplorer
 {
-    public class Item
+    public abstract class Item
     {
         public string type { get; protected set; }
         public string Name { get; protected set; }
-        public Item(string _name)
+
+        protected Item(string name)
         {
-            this.Name = _name;
-            this.type = type;
+            this.Name = name;
         }
 
-        public virtual Player Use(Player player)
-        {
-            Console.WriteLine("Cannot be used. Press enter to return");
-            Console.ReadLine();
-            return player;
-        }
+        public abstract void Use(Player player);
     }
+
     public class HealthPotion : Item
     {
-        public int healAmount { get; protected set; }
-        public HealthPotion(string _name, int _healAmount) : base(_name)
+        private int healAmount;
+
+        public HealthPotion(string name, int healAmount) : base(name)
         {
-            this.healAmount = _healAmount;
+            this.healAmount = healAmount;
             type = "potion";
         }
-        public override Player Use(Player player)
+
+        public override void Use(Player player)
         {
             player.Heal(healAmount);
-            Console.WriteLine($"{player.name} used {Name} and healed for {healAmount} health");
-            return player;
+            Console.WriteLine($"{player.name} used {Name} and healed for {healAmount} health!");
         }
     }
+
     public class Weapon : Item
     {
-        public int chanceMultiplyer { get; private set; }
-        public Weapon(string _name, int damage) : base(_name)
+        public int damage { get; private set; }
+
+        public Weapon(string name, int damage) : base(name)
         {
+            this.damage = damage;
             type = "weapon";
-            chanceMultiplyer = damage;
+        }
+
+        public override void Use(Player player)
+        {
+            Console.WriteLine($"{Name} has been equipped!");
         }
     }
 }
