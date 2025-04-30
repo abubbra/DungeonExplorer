@@ -40,11 +40,11 @@ namespace DungeonExplorer
     }
     public class Weapon : Item
     {
-        public int Damage { get; private set; }
+        public int chanceMultiplyer { get; private set; }
         public Weapon(string _name, int damage) : base(_name)
         {
             type = "weapon";
-            Damage = damage;
+            chanceMultiplyer = damage;
         }
     }
 }

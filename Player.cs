@@ -9,6 +9,7 @@ namespace DungeonExplorer
 {
     public class Player : Creature
     {
+        public int currentRoomIndex = 0;
         public override int Attack()
         {
             throw new NotImplementedException();
@@ -24,6 +25,22 @@ namespace DungeonExplorer
 
         public List<Item> Inventory { get; private set; }
 
+        public void scout(Room room)
+        {
+            throw null;
+            //Console.WriteLine(room.GetDescription); //displays the room description
+            //if (room.hasItem) //if the room has an item
+            //{
+            //    Console.WriteLine($"you have found a {room.item.Name}"); //displays the item found in the room
+            //    Console.WriteLine("do you want to pick it up? y/n");
+            //    string choice = InputVerify.GetInput(new List<string> { "y", "n" });
+            //    if (choice == "y")
+            //    {
+            //        PickUpItem(room.item); //picks up the item
+            //        room.hasItem = false; //removes the item from the room
+            //    }
+            //}
+        }
 
         public void PickUpItem(Item item)
         {

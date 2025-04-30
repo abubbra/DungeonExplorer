@@ -8,44 +8,16 @@ namespace DungeonExplorer
 {
     public class Room
     {
-        // Git test 
-        protected string description;
-        public string item { get; set; }
-
-        //Room room1descrip = new Room("the room fills with a cold and sharp air, lava flows down the walls and the floor is covered in bones and skulls");
-
-        //Represents a single room in the game with a description and possibly an item
-
-        protected string roomdescription;
-        
-
-        public Room()
+        protected string description { get; set; } 
+        public bool hasItem { get; protected set; } = true;
+        public Item item { get; protected set; }                      
+        public string GetDescription() => description;
+        public Item GetItem()
         {
-
-            // this.description = description;   // the class for the room description
-            //item = item;
-        }
-        public virtual void setroomdetails()
-        {
-
-        }
-        public virtual string GetDescription()
-        {
-            //Console.WriteLine(description);
-            //Console.WriteLine("you find a health potion here");
-
-            return description;
-        }
-        public string GetItem()
-        {
-            // Console.WriteLine("you picked up a health potion ");
+            hasItem = false; //sets the item to not have an item
             return item;
         }
-
     }
-
-    
-
     internal class roomtypes
     {
         public class Entrance : Room
@@ -53,7 +25,7 @@ namespace DungeonExplorer
             public Entrance()
             {
                 description = "you stand in the entrance of the dungeon, lava flows down the walls and the floor is covered in bones and skulls";
-                item = "health potion";
+                item = new Weapon("sword", 10);
             }
         }
         public class GoblinRoom : Room
@@ -61,7 +33,7 @@ namespace DungeonExplorer
             public GoblinRoom()
             {
                 description = "a goblin appears before you";
-                item = "goblin club";
+                item = new HealthPotion("small health oil", 20);
             }
         }
         public class TrollRoom : Room
@@ -69,202 +41,83 @@ namespace DungeonExplorer
             public TrollRoom()
             {
                 description = "a troll appears before you";
-                item = "troll eyeball";
+                item = new Weapon("axe", 20);
             }
         }
-
         public class BabyDragonRoom : Room
         {
             public BabyDragonRoom()
             {
                 description = "a baby dragon appears before you";
-                item = "dragon blade";
+                item = new HealthPotion("big health oil", 35);
             }
         }
-
         public class GollemRoom : Room
         {
             public GollemRoom()
             {
                 description = "the room around you is covered in weird rock formations and crystals in the wall. a gollem blocks your path";
-                item = "golem stone heart";
+                item = new Weapon("Spear of light", 50);
             }
         }
-
-        public class EmptyRoom : Room
+        public class FinalRoom : Room
         {
-            public EmptyRoom()
+            public FinalRoom()
             {
                 description = "this room is empty";
-                item = null;
+                hasItem = false;
             }
         }
     }
 
-
-
-
     public class GameMap
     {
-        private Room[,] rooms;
-        private int playerX = 0;
-        private int playerY = 0;
-
-
-
-
-
-
+        private List<Room> rooms = new List<Room>();
         public GameMap()
         {
-            rooms = new Room[3, 3]
+            rooms = new List<Room>
             {
-                {new Entrance(), new GoblinRoom(), new TrollRoom()},
-                {new BabyDragonRoom(), new GollemRoom(), new EmptyRoom ()},
-                {new EmptyRoom(), new EmptyRoom(), new EmptyRoom()}
-
-
+                new Entrance(),
+                new GoblinRoom(),
+                new TrollRoom(),
+                new BabyDragonRoom(),
+                new GollemRoom(),
+                new FinalRoom(),
             };
-
-            
         }
-
-        public  Room GetCurrentRoom()
+        public Room getNewRoom(int origIndex,string direction)
         {
-            return rooms[playerY, playerX];
-        }
-        
-
-        public void displaymap()
-        {
-            for (int y = 0; y < rooms.GetLength(0); y++)
+            try
             {
-                for (int x = 0; x < rooms.GetLength(1); x++)
+                if (direction == "left")
                 {
-                    if (rooms[y, x] != null)
-                        Console.Write("[Room]");
-                    else
-                        Console.WriteLine("[empty]");
+                    Program.game.player.currentRoomIndex = origIndex - 1;
+                    return rooms[origIndex - 1];
                 }
-                Console.WriteLine();
-            }
-        }
-
-        public void CurrentRoomDetails()
-        {
-            Room currentroom = rooms[playerY, playerX];
-
-            if (currentroom != null)
-            {
-                Console.WriteLine(" you are currently in :");
-                Console.WriteLine(currentroom.GetDescription());
-
-                if (string.IsNullOrEmpty(currentroom.GetItem()))
+                else if (direction == "right")
                 {
-                    Console.WriteLine("you found an item:  {currentroom.GetItem()}");
+                    Program.game.player.currentRoomIndex = origIndex + 1;
+                    return rooms[origIndex + 1];
                 }
                 else
                 {
-                    Console.WriteLine("there is nothing in this room");
+                    Console.WriteLine("invalid input");
+                    return rooms[origIndex];
                 }
             }
-            else
+            catch (ArgumentOutOfRangeException)
             {
-                Console.WriteLine("you are in an empty room");
-            }
-
-
+                Console.WriteLine("you cannot go that way");
+                return null;
+            };
         }
-
-        public void MovePlayer(string direction)
+        public void displaymap(Room current)
         {
-            switch (direction.ToLower())
+            foreach (Room r in rooms)
             {
-                case "north":
-                    if (playerY > 0)                   
-                        playerY--;                        
-                    break;
-                case "south":
-                    if (playerY < rooms.GetLength(0) - 1)
-                    
-                        playerY++;
-                   
-                    break;
-                case "east":
-                    if (playerX < rooms.GetLength(1) - 1)
-                    
-                        playerX++;
-                     
-                    break;
-                case "west":
-                    if (playerX > 0)
-                    
-                        playerX--;
-                  
-                    break;
-                default:
-                    Console.WriteLine("Invalid direction");
-                    break;
+                Console.Write(r.GetDescription() + " ");
             }
+            Console.WriteLine("\nYou are in " + current.GetDescription());
         }
-
-
-        public abstract class Item
-        {
-            public string Name { get; set; }
-            public Item(string name)
-            {
-                Name = name;
-            }
-            public abstract void Use(Player player);
-
-
-        }
-
-        public class healthpotion : Item
-        {
-            private int healingamount = 30;
-            public healthpotion() : base("health potion")
-            {
-
-            }
-
-            public override void Use(Player player)
-            {
-                player.Heal(healingamount);
-                Console.WriteLine("you used a health potion and healed {healingamount} health");
-            }
-
-        }
-
-        //public class weapon : Item
-        //{
-        //    public int bonusdamageamount { get; set; }
-        //    public dragonblade(string name, int bonusdamageamount) : base(name)
-        //    {
-        //        bonusdamageamount = bonusdamageamount;
-        //    }
-           
-
-        //    public override void Use(Player player)
-        //    {
-        //        player.equipweapon(this);
-        //        Console.WriteLine("you equipped the {name}! your attack damage now does 30 more damage");
-        //    }
-
-        //}
-          
-        
-        
-
-            
-        
-
-
-
-
-
-
-
-        }
+    }
 }

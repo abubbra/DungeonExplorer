@@ -27,11 +27,10 @@ namespace DungeonExplorer
     }
     public class Program
     {
-
+        public static Game game;
         public static void Main(string[] Args)
         {
-            Game game = new Game();
-
+            game = new Game();
         }
     }
 }
